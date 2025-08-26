@@ -1,0 +1,160 @@
+Manik:
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Offers</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #ffffff; 
+        }
+
+        /* --- Top Bar (The only header now) --- */
+        .top-bar {
+            background-color: #1f1f1f;
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .top-bar h1 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+        }
+        .top-bar .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* --- Main Content Area --- */
+        .tasks-container {
+            padding: 20px 15px;
+        }
+
+        /* --- Task Card Styles --- */
+        .task-card {
+            display: flex;
+            align-items: center;
+            background-color: #F3EEFF;
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .task-icon {
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
+            margin-right: 15px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .task-details {
+            flex-grow: 1;
+        }
+        .task-details .title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f1f1f;
+            margin: 0 0 4px 0;
+        }
+        .task-details .description {
+            font-size: 14px;
+            color: #555;
+            margin: 0;
+            line-height: 1.4;
+        }
+        .get-btn {
+            background-color: #7B2CBF;
+            color: white;
+            padding: 10px 28px;
+            border: none;
+            border-radius: 20px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            margin-left: 10px;
+            flex-shrink: 0;
+            transition: background-color 0.2s;
+        }
+        .get-btn:hover {
+            background-color: #6A25A8;
+        }
+        
+        .settings-fab {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 56px;
+            height: 56px;
+            background-color: #BDBDBD;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            cursor: pointer;
+        }
+        .settings-fab svg { width: 24px; height: 24px; fill: #424242; }
+    </style>
+</head>
+<body>
+
+    <header class="top-bar">
+        <h1>Task Offers</h1>
+        <div class="menu-icon">&#8942;</div>
+    </header>
+
+    <!-- The purple secondary-bar has been removed from here -->
+
+    <div class="tasks-container" id="user-task-list">
+        <!-- Tasks from Firebase will be loaded here -->
+    </div>
+    
+    <div class="settings-fab">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61-.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19-.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+    </div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        const firebaseConfig = { apiKey: "AIzaSyC4LpwqmIzFVwLMp8w9ibyfmOq2Dc-JBkc", authDomain: "ohaadslocker.firebaseapp.com", projectId: "ohaadslocker", storageBucket: "ohaadslocker.appspot.com", messagingSenderId: "480353270472", appId: "1:480353270472:web:34d9e206c0a4d8c49503fd" };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const tasksCollection = db.collection('tasks');
+
+        const userTaskList = document.getElementById('user-task-list');
+
+        tasksCollection.onSnapshot(snapshot => {
+            userTaskList.innerHTML = '';
+            if (snapshot.empty) {
+                userTaskList.innerHTML = '<p style="text-align:center; color: #888;">No tasks available right now.</p>';
+                return;
+            }
+            snapshot.forEach(doc => {
+                const task = doc.data();
+                const taskCard = document.createElement('div');
+                taskCard.className = 'task-card';
+                taskCard.innerHTML = 
+                    <img src="${task.iconUrl}" alt="Icon" class="task-icon">
+                    <div class="task-details">
+                        <p class="title">${task.name}</p>
+                        <p class="description">${task.description}</p>
+                    </div>
+                    <a href="${task.link}" target="_blank" rel="noopener noreferrer" class="get-btn">Get</a>
+                ;
+                userTaskList.appendChild(taskCard);
+            });
+        });
+    </script>
+</body>
+</html>
